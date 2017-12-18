@@ -9,7 +9,7 @@ import com.pusher.chatkit.*
 import kotlinx.android.synthetic.main.activity_rooms_list.*
 
 class RoomsListActivity : AppCompatActivity() {
-    private val instanceLocator = "v1:us1:a198a551-439e-4b78-af06-477e7bbd110d"
+    private val instanceLocator = "INSTANCE_LOCATOR"
     val adapter = RoomsAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
