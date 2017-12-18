@@ -43,6 +43,6 @@ class ChatMessageAdapter: RecyclerView.Adapter<ChatMessageAdapter.ViewHolder>() 
 
     inner class ViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView) {
         var userName: TextView = itemView!!.findViewById(R.id.text_user_name)
-        var message: TextView = itemView!!.findViewById(R.id.message)
+        var message: TextView = itemView!!.findViewById(R.id.chat_message)
     }
 }

@@ -9,7 +9,7 @@ import com.pusher.chatkit.*
 import kotlinx.android.synthetic.main.activity_rooms_list.*
 
 class RoomsListActivity : AppCompatActivity() {
-    private val instanceLocator = "v1:us1:cb460a44-db4d-44f6-95d9-4a3faa31c47f"
+    private val instanceLocator = "v1:us1:a198a551-439e-4b78-af06-477e7bbd110d"
     val adapter = RoomsAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,8 +60,8 @@ class RoomsListActivity : AppCompatActivity() {
                             // user already belongs to this room
                             roomJoined(room)
                         } else {
-                            currentUser.joinRoom(room, RoomListener { room ->
-                                roomJoined(room)
+                            currentUser.joinRoom(room, RoomListener { theRoom ->
+                                roomJoined(theRoom)
                             }, ErrorListener { error ->
                                 Log.d("TAG", error.toString())
                             })
