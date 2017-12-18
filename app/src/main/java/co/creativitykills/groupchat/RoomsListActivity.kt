@@ -69,6 +69,52 @@ class RoomsListActivity : AppCompatActivity() {
                     }
                 })
             }
+
+            // Other events can be handled...
+
+            override fun removedFromRoom(roomId: Int) {
+                // Fired when a user is removed from the room
+            }
+
+            override fun userLeft(user: User?, room: Room?) {
+                // Fired when a user leaves
+            }
+
+            override fun usersUpdated() {
+                // Fired when the users list is updated
+            }
+
+            override fun userCameOnline(user: User?) {
+                // Fired when user comes online
+            }
+
+            override fun roomUpdated(room: Room?) {
+                // Fired when room is updated
+            }
+
+            override fun addedToRoom(room: Room?) {
+                // Fired when user is added to room
+            }
+
+            override fun roomDeleted(roomId: Int) {
+                // Fired when room is deleted
+            }
+
+            override fun userWentOffline(user: User?) {
+                // Fired when a user goes offline
+            }
+
+            override fun userStoppedTyping(user: User?) {
+                // Fired when a user stops typing
+            }
+
+            override fun userJoined(user: User?, room: Room?) {
+                // Fired when a user joins the room
+            }
+
+            override fun userStartedTyping(user: User?) {
+                // Fired when the user starts typing
+            }
         })
     }
 
