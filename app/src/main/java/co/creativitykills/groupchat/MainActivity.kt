@@ -16,11 +16,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         button_login.setOnClickListener {
             if (text_user_name.text.isNotEmpty()) {
-                val userName: String = text_user_name.text.toString()
-                Log.d("TAG",userName)
-                createNewUser(userName)
+                createNewUser(text_user_name.text.toString())
             } else {
                 Toast.makeText(this@MainActivity,"Please enter a username", Toast.LENGTH_LONG).show()
             }
@@ -29,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun createNewUser(userName: String) {
         val jsonObject = JSONObject()
-        jsonObject.put("username",userName)
+        jsonObject.put("username", userName)
 
         RetrofitClient().getClient().createUser(userName).enqueue(object: Callback<String>{
             override fun onFailure(call: Call<String>?, t: Throwable?) {

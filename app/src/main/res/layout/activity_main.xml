@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:layout_margin="16dp"
-    tools:context="com.example.android.groupchatapp.MainActivity">
+    tools:context="co.creativitykills.groupchat.MainActivity">
 
     <EditText
         android:id="@+id/text_user_name"
