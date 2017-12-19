@@ -11,18 +11,9 @@ class ChatMessageAdapter: RecyclerView.Adapter<ChatMessageAdapter.ViewHolder>() 
 
     private var list = ArrayList<Message>()
 
-    fun setList(list:ArrayList<Message>){
-        this.list = list
-        notifyDataSetChanged()
-    }
-
     fun addMessage(e: Message){
         list.add(e)
         notifyDataSetChanged()
-    }
-
-    init {
-        setList(ArrayList())
     }
 
     override fun getItemCount(): Int {
