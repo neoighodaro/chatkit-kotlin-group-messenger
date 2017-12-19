@@ -1,5 +1,6 @@
 package co.creativitykills.groupchat
 
+import android.app.Activity
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -7,6 +8,8 @@ import android.util.Log
 import com.pusher.chatkit.*
 import elements.Error
 import kotlinx.android.synthetic.main.activity_chat_room.*
+import android.view.inputmethod.InputMethodManager
+import android.view.View
 
 class ChatRoomActivity : AppCompatActivity() {
     lateinit var adapter:ChatMessageAdapter
@@ -35,12 +38,26 @@ class ChatRoomActivity : AppCompatActivity() {
         button_send.setOnClickListener {
             if (edit_text.text.isNotEmpty()){
                 currentUser.addMessage(edit_text.text.toString(),room, MessageSentListener {
-                    Log.d("TAG", "message sent")
+                    runOnUiThread {
+                        edit_text.text.clear()
+                        hideKeyboard()
+                    }
                 }, ErrorListener {
                     Log.d("TAG", "error")
                 })
             }
         }
+    }
+
+    private fun hideKeyboard() {
+        val imm = this.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        var view = this.currentFocus
+
+        if (view == null) {
+            view = View(this)
+        }
+
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun setUpRecyclerView() {
