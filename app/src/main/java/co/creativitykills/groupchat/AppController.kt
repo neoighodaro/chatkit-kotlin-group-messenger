@@ -2,7 +2,7 @@ package co.creativitykills.groupchat
 
 import android.app.Application
 import com.pusher.chatkit.CurrentUser
-import com.pusher.chatkit.Room
+import com.pusher.chatkit.rooms.Room
 
 class AppController(): Application() {
     override fun onCreate() {

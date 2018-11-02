@@ -5,8 +5,9 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
-import com.pusher.chatkit.*
-import elements.Error
+import com.pusher.chatkit.messages.Message
+import com.pusher.util.Result
+import com.pusher.chatkit.rooms.RoomListeners
 import kotlinx.android.synthetic.main.activity_chat_room.*
 import android.view.inputmethod.InputMethodManager
 import android.view.View
@@ -22,29 +23,46 @@ class ChatRoomActivity : AppCompatActivity() {
         setUpRecyclerView()
 
         val currentUser = AppController.currentUser
-        val room = currentUser.getRoom(intent.getIntExtra("room_id",-1))
+        val roomId = intent.getStringExtra("room_id")
 
-        currentUser.subscribeToRoom(room!!,100,object: RoomSubscriptionListeners {
-            override fun onNewMessage(message: Message?) {
-                Log.d("TAG",message!!.text)
-                adapter.addMessage(message)
-            }
-
-            override fun onError(error: Error?) {
-                Log.d("TAG", error.toString())
-            }
-        })
+        currentUser.subscribeToRoom(
+                roomId = roomId,
+                listeners = RoomListeners(
+                    onMessage = { message ->
+                        Log.d("TAG",message.text)
+                        adapter.addMessage(message)
+                    },
+                    onErrorOccurred = { error ->
+                        Log.d("TAG", error.toString())
+                    }
+                ),
+                messageLimit = 100, // Optional
+                callback = { subscription ->
+                    // Called when the subscription has started.
+                    // You should terminate the subscription with subscription.unsubscribe()
+                    // when it is no longer needed
+                }
+        )
 
         button_send.setOnClickListener {
             if (edit_text.text.isNotEmpty()){
-                currentUser.addMessage(edit_text.text.toString(),room, MessageSentListener {
-                    runOnUiThread {
-                        edit_text.text.clear()
-                        hideKeyboard()
-                    }
-                }, ErrorListener {
-                    Log.d("TAG", "error")
-                })
+                currentUser.sendMessage(
+                        roomId = roomId,
+                        messageText = edit_text.text.toString(),
+                        callback = { result -> //Result<Int, Error>
+                            when (result) {
+                                is Result.Success -> {
+                                    runOnUiThread {
+                                        edit_text.text.clear()
+                                        hideKeyboard()
+                                    }
+                                }
+                                is Result.Failure -> {
+                                    Log.d("TAG", "error: " + result.error.toString())
+                                }
+                            }
+                        }
+                )
             }
         }
     }

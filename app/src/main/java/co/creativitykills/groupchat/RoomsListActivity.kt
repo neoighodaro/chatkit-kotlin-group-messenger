@@ -6,10 +6,11 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import com.pusher.chatkit.*
+import com.pusher.chatkit.rooms.Room
+import com.pusher.util.Result
 import kotlinx.android.synthetic.main.activity_rooms_list.*
 
 class RoomsListActivity : AppCompatActivity() {
-    private val instanceLocator = "INSTANCE_LOCATOR"
     val adapter = RoomsAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,97 +26,90 @@ class RoomsListActivity : AppCompatActivity() {
     }
 
     private fun initChatManager() {
-        val chatManager = ChatManager.Builder()
-                .instanceLocator(instanceLocator)
-                .context(this@RoomsListActivity)
-                .tokenProvider(
-                        ChatkitTokenProvider("http://10.0.2.2:3000/auth", intent.getStringExtra("extra"))
+        val chatManager = ChatManager(
+                instanceLocator = "YOUR_INSTANCE_LOCATOR",
+                userId = "YOUR_USER_ID",
+                dependencies = AndroidChatkitDependencies(
+                        tokenProvider = ChatkitTokenProvider(
+                                endpoint = "http://10.0.2.2:3000/auth",
+                                userId = "YOUR_USER_ID"
+                        )
                 )
-                .build()
+        )
 
+        // TODO: What do we need to do with these that were here before?
+//                .context(this@RoomsListActivity)
+//        intent.getStringExtra("extra")
 
-        chatManager.connect(object: UserSubscriptionListener {
-            override fun onError(error: elements.Error?) {
-                Log.d("TAG", error.toString())
-            }
+        chatManager.connect(listeners = ChatListeners(
+                onErrorOccurred = { },
+                onAddedToRoom = { },
+                onRemovedFromRoom = { },
+                onCurrentUserReceived = { },
+                onNewReadCursor = { },
+                onRoomDeleted = { },
+                onRoomUpdated = { },
+                onPresenceChanged = { u, n, p -> },
+                onUserJoinedRoom = { u, r -> },
+                onUserLeftRoom = { u, r -> },
+                onUserStartedTyping = { u, r -> },
+                onUserStoppedTyping = { u, r -> }
+        )) { result ->
+            when (result) {
+                is Result.Success -> {
+                    // We have connected!
+                    val currentUser = result.value
+                    AppController.currentUser = currentUser
+                    val userJoinedRooms = ArrayList<Room>(currentUser.rooms)
+                    for (i in 0 until userJoinedRooms.size) {
+                        adapter.addRoom(userJoinedRooms[i])
+                    }
 
-            override fun currentUserReceived(currentUser: CurrentUser?) {
-                val userJoinedRooms = ArrayList<Room>(currentUser!!.rooms())
-                for (i in 0 until userJoinedRooms.size) {
-                    adapter.addRoom(userJoinedRooms[i])
+                    currentUser.getJoinableRooms { result ->
+                        when (result) {
+                            is Result.Success -> {
+                                // Do something with List<Room>
+                                val rooms = result.value
+                                runOnUiThread {
+                                    for (i in 0 until rooms.size) {
+                                        adapter.addRoom(rooms[i])
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    adapter.setInterface(object : RoomsAdapter.RoomClickedInterface {
+                        override fun roomSelected(room: Room) {
+                            if (room.memberUserIds.contains(currentUser.id)) {
+                                // user already belongs to this room
+                                roomJoined(room)
+                            } else {
+                                currentUser.joinRoom(
+                                        roomId = room.id,
+                                        callback = { result ->
+                                            when (result) {
+                                                is Result.Success -> {
+                                                    // Joined the room!
+                                                    roomJoined(result.value)
+                                                }
+                                                is Result.Failure -> {
+                                                    Log.d("TAG", result.error.toString())
+                                                }
+                                            }
+                                        }
+                                )
+                            }
+                        }
+                    })
                 }
 
-                AppController.currentUser = currentUser
-                currentUser.getJoinableRooms(RoomsListener { rooms ->
-                    runOnUiThread {
-                        for (i in 0 until rooms.size) {
-                            adapter.addRoom(rooms[i])
-                        }
-                    }
-                })
-
-                adapter.setInterface(object : RoomsAdapter.RoomClickedInterface {
-                    override fun roomSelected(room: Room) {
-                        if (room.memberUserIds.contains(currentUser.id)) {
-                            // user already belongs to this room
-                            roomJoined(room)
-                        } else {
-                            currentUser.joinRoom(room, RoomListener { theRoom ->
-                                roomJoined(theRoom)
-                            }, ErrorListener { error ->
-                                Log.d("TAG", error.toString())
-                            })
-                        }
-                    }
-                })
+                is Result.Failure -> {
+                    // Failure
+                    Log.d("TAG", result.error.toString())
+                }
             }
-
-            // Other events can be handled...
-
-            override fun removedFromRoom(roomId: Int) {
-                // Fired when a user is removed from the room
-            }
-
-            override fun userLeft(user: User?, room: Room?) {
-                // Fired when a user leaves
-            }
-
-            override fun usersUpdated() {
-                // Fired when the users list is updated
-            }
-
-            override fun userCameOnline(user: User?) {
-                // Fired when user comes online
-            }
-
-            override fun roomUpdated(room: Room?) {
-                // Fired when room is updated
-            }
-
-            override fun addedToRoom(room: Room?) {
-                // Fired when user is added to room
-            }
-
-            override fun roomDeleted(roomId: Int) {
-                // Fired when room is deleted
-            }
-
-            override fun userWentOffline(user: User?) {
-                // Fired when a user goes offline
-            }
-
-            override fun userStoppedTyping(user: User?) {
-                // Fired when a user stops typing
-            }
-
-            override fun userJoined(user: User?, room: Room?) {
-                // Fired when a user joins the room
-            }
-
-            override fun userStartedTyping(user: User?) {
-                // Fired when the user starts typing
-            }
-        })
+        }
     }
 
     private fun roomJoined(room: Room) {
