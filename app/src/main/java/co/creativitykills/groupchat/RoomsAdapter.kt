@@ -3,7 +3,7 @@ package co.creativitykills.groupchat
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.pusher.chatkit.Room
+import com.pusher.chatkit.rooms.Room
 import android.view.LayoutInflater
 import android.support.v7.widget.RecyclerView
 
